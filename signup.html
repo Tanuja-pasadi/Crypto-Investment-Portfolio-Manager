@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+    <div class="glass-card" style="width: 100%; max-width: 450px;">
+        <h2 style="text-align: center; margin-bottom: 30px;">Create Account</h2>
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required placeholder="CryptoTrader99">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="Minimum 8 characters">
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Sign Up</button>
+        </form>
+        <p style="text-align: center; margin-top: 20px; color: var(--text-secondary);">
+            Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent); text-decoration: none;">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

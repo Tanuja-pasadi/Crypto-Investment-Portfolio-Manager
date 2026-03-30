@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h1>Dashboard Analytics</h1>
+    <div style="color: var(--text-secondary);">Welcome, {{ user.username }}</div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="glass-card">
+        <h3>Price Trend Analysis</h3>
+        <div class="chart-container">
+            <canvas id="priceTrendChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-card">
+        <h3>Risk Comparison (Volatility)</h3>
+        <div class="chart-container">
+            <canvas id="riskChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-card">
+        <h3>Average Daily Returns</h3>
+        <div class="chart-container">
+            <canvas id="returnsChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-card">
+        <h3>Price vs Volume Relationship</h3>
+        <div class="chart-container">
+            <canvas id="priceVolumeChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadDashboardData();
+    });
+</script>
+{% endblock %}

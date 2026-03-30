@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-bottom: 30px;">
+    <h1>Investment Risk Calculator</h1>
+    <p style="color: var(--text-secondary);">AI-driven portfolio allocation based on risk-return optimization.</p>
+</div>
+
+<div class="calculator-split">
+    <!-- Left Column: Form -->
+    <div>
+        <div class="glass-card" style="margin-bottom: 20px;">
+            <h3>Simulation Setup</h3>
+            <form method="POST" action="{{ url_for('calculator') }}">
+                <div class="form-group">
+                    <label for="amount">Total Investment Amount ($)</label>
+                    <input type="number" step="0.01" id="amount" name="amount" class="form-control" placeholder="10000" required value="{{ amount if amount else '' }}">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Calculate Portfolio</button>
+            </form>
+        </div>
+        
+        {% if results %}
+        <div class="glass-card" style="border-left: 4px solid var(--success);">
+            <h3>Top Recommendation</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 10px;">Best Cryptocurrency to Invest:</p>
+            <h2 style="color: var(--accent); margin: 0;">{{ results.best_crypto }}</h2>
+            <p style="margin-top: 10px; font-weight: 500;">Suggested Investment: <span style="color: var(--success);">${{ "%.2f"|format(results.best_investment) }}</span></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Results -->
+    {% if results %}
+    <div>
+        <div class="glass-card" style="margin-bottom: 20px;">
+            <h3>Portfolio Construction</h3>
+            <div class="chart-container" style="height: 300px;">
+                <canvas id="allocationPieChart"></canvas>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Allocated Weight</th>
+                            <th>Investment ($)</th>
+                            <th>Coins to Buy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results.portfolio %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ row.Name }}</td>
+                            <td>{{ "%.1f"|format(row.Weight * 100) }}%</td>
+                            <td style="color: var(--success);">${{ "%.2f"|format(row.Investment) }}</td>
+                            <td>{{ "%.4f"|format(row.Coins_to_Buy) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3>Optimized Portfolio vs Equal Distribution</h3>
+            <div class="chart-container" style="height: 300px;">
+                <canvas id="barCompareChart"></canvas>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div>
+        <div class="glass-card" style="height: 100%; display: flex; align-items: center; justify-content: center; opacity: 0.5;">
+            <div style="text-align: center;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <h3>Awaiting Input</h3>
+                <p>Enter an investment amount to see portfolio allocations.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if results %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Shared chart styling
+    Chart.defaults.color = "#8b949e";
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
+    // Allocation Pie Chart
+    const pieCtx = document.getElementById('allocationPieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ results.labels | tojson }},
+            datasets: [{
+                data: {{ results.investments | tojson }},
+                backgroundColor: [
+                    'rgba(88, 166, 255, 0.8)',
+                    'rgba(163, 113, 247, 0.8)',
+                    'rgba(46, 160, 67, 0.8)',
+                    'rgba(248, 81, 73, 0.8)',
+                    'rgba(210, 153, 34, 0.8)'
+                ],
+                borderColor: 'rgba(22, 27, 34, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' },
+                title: { display: false }
+            }
+        }
+    });
+
+    // Comparison Bar Chart
+    const barCtx = document.getElementById('barCompareChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ results.labels | tojson }},
+            datasets: [
+                {
+                    label: 'Optimized Investment',
+                    data: {{ results.investments | tojson }},
+                    backgroundColor: 'rgba(88, 166, 255, 0.8)',
+                },
+                {
+                    label: 'Equal Investment Baseline',
+                    data: {{ results.equal_investments | tojson }},
+                    backgroundColor: 'rgba(139, 148, 158, 0.5)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}
